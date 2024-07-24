@@ -47,11 +47,10 @@ void loop() {
     startTime = millis();
   }
   if (globalState == 2){ // Timer countDown
-    countdown();
     if(getSecLeft() <= 0){
       globalState++;
     }
-
+    countdown();
   }
 }
 
