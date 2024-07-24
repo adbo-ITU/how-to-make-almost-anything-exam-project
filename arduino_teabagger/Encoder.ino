@@ -3,63 +3,69 @@
 
 #define pinA 11
 #define pinB 12
-#define buttonpin 13
+#define encoderButtonpin 13
 
 const int maxMin = 99;
-int minutes = 0;
+const int maxTemp = 100;
+float temp;
+float minutes;
 int aState;
 int aLastState;
-bool buttonState;
-bool buttonLastState;
+bool encoderButtonState;
+bool encoderButtonLastState;
 int globalState;
 
 void setup() { 
   pinMode(pinA, INPUT);
   pinMode(pinB, INPUT);
-  pinMode(buttonpin, INPUT);
+  pinMode(encoderButtonpin, INPUT);
    
   Serial.begin(9600);
   // Reads the initial state of the outputA
   aLastState = digitalRead(pinA);
-  buttonLastState = digitalRead(buttonpin);
-  globalState = 1;
+  encoderButtonLastState = digitalRead(encoderButtonpin);
+  globalState = 0;
+  temp = 100;
+  minutes = 0;
 } 
 
 void loop() {
   if (globalState == 0){ // Select temp
-  
-
+    updateValEncoder(temp, maxTemp, 0, 5);
+    confirmSelection();
   }
   if (globalState == 1){ // Select time
-    aState = 0;
+    updateValEncoder(minutes, maxMin, 0, 0.5);
+    confirmSelection();
+  }
+  if (globalState == 2){ // Timer countDown
+  }
+}
 
+void updateValEncoder(float &val, int maxval, int minval, float interval){
     aState = digitalRead(pinA); // Reads the "current" state of the outputA
     // If the previous and the current state of the outputA are different, that means a Pulse has occured
     if (aState != aLastState){     
       // If the outputB state is different to the outputA state, that means the encoder is rotating clockwise
       if (digitalRead(pinB) != aState) { 
-        if(minutes > 0) {minutes --;} // 
+        if(val > minval) {val -=interval;} // 
       } else {
-        if(minutes < maxMin) {minutes ++;} // 
+        if(val < maxval) {val +=interval;} // 
       }
-      Serial.print("Minutes: ");
-      Serial.println(minutes);
+      Serial.print("value: ");
+      Serial.println(val);
     } 
     aLastState = aState; // Updates the previous state of the outputA with the current state
-
-
-    buttonState = digitalRead(buttonpin);
-
-    if (buttonState != buttonLastState) {
-      if (buttonState == 0) {
-        Serial.println("Button was pressed");
-        globalState = 2;
-      }
-      buttonLastState = buttonState;
-    }
-  }
-  if(globalState == 2){ // Timer countDown
-
-  }
 }
 
+void confirmSelection(){
+  encoderButtonState = digitalRead(encoderButtonpin);
+  if (encoderButtonState !=encoderButtonLastState) {
+    if (encoderButtonState == 0) {
+      Serial.println("Button was pressed");
+      globalState ++;
+      Serial.println(globalState);
+    }
+    encoderButtonLastState = encoderButtonState;
+  }
+}
