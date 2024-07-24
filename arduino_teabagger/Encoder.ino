@@ -2,10 +2,7 @@
 // https://docs.arduino.cc/learn/electronics/lcd-displays/
 
 #include <LiquidCrystal.h>
-
-#define rotaryPinA 11
-#define rotaryPinB 12
-#define rotaryButtonpin 13
+#include "rotaryEncoder.h"
 
 #define rs 7
 #define en 6
@@ -14,35 +11,22 @@
 #define d6 3
 #define d7 2
 
+int globalState = 0;
+
+const char tempText[] = "Temp";
+const char timeText[] = "Time left ";
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 const int maxSec = 5940;
 const int maxTemp = 100;
-int temp;
-int seconds;
+int temp = 100;
+int seconds = 0;
+
 unsigned long startTime;
 
-int aState;
-int aLastState;
-bool encoderButtonState;
-bool encoderButtonLastState;
-int globalState;
-
-char tempText[] = "Temp";
-char timeText[] = "Time left ";
-LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
-
 void setup() { 
-  // set rotary pins
-  pinMode(rotaryPinA, INPUT);
-  pinMode(rotaryPinB, INPUT);
-  pinMode(rotaryButtonpin, INPUT);
-   
   Serial.begin(9600);
   // Reads the initial state of the outputA
-  aLastState = digitalRead(rotaryPinA);
-  encoderButtonLastState = digitalRead(rotaryButtonpin);
-  globalState = 0;
-  temp = 100;
-  seconds = 0;
+
 
   lcd.begin(16, 2);
   lcd.print(tempText);
@@ -54,12 +38,12 @@ void loop() {
   if (globalState == 0){ // Select temp
     updateValEncoder(temp, maxTemp, 0, 5);
     printTemp(int(temp));
-    confirmSelection();
+    confirmSelection(globalState);
   }
   if (globalState == 1){ // Select time
     updateValEncoder(seconds, maxSec, 0, 5);
     printTime(seconds/60, seconds%60);
-    confirmSelection();
+    confirmSelection(globalState);
     startTime = millis();
   }
   if (globalState == 2){ // Timer countDown
@@ -71,32 +55,7 @@ void loop() {
   }
 }
 
-void updateValEncoder(int &val, int maxval, int minval, int interval){
-    aState = digitalRead(rotaryPinA); // Reads the "current" state of the outputA
-    // If the previous and the current state of the outputA are different, that means a Pulse has occured
-    if (aState != aLastState){     
-      // If the outputB state is different to the outputA state, that means the encoder is rotating clockwise
-      if (digitalRead(rotaryPinB) != aState) { 
-        if(val > minval) {val -=interval;} // 
-      } else {
-        if(val < maxval) {val +=interval;} // 
-      }
-      Serial.print("value: ");
-      Serial.println(val);
-    } 
-    aLastState = aState; // Updates the previous state of the outputA with the current state
-}
-void confirmSelection(){
-  encoderButtonState = digitalRead(rotaryButtonpin);
-  if (encoderButtonState !=encoderButtonLastState) {
-    if (encoderButtonState == 0) {
-      Serial.println("Button was pressed");
-      globalState ++;
-      Serial.println(globalState);
-    }
-    encoderButtonLastState = encoderButtonState;
-  }
-}
+
 void temperature(){
 
   lcd.setCursor(10, 0);
