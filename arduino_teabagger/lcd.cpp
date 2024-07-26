@@ -49,7 +49,7 @@ void printTemp(int t){
   lcd.print("C");
 }
 
-void flashText(char text[], int locationX, int locationY){
+void flashTextOn(char text[], int locationX, int locationY){
     if (millis() - blinkTime < blinkInterval) {
         return;
     }
@@ -60,9 +60,16 @@ void flashText(char text[], int locationX, int locationY){
         blinkTime = millis();
         return;
     }
-    int len = sizeof(text) / sizeof(char);
-    for (int i = 0; i < len; i++) {
+
+    for (int i = 0; i < strlen(text); i++) {
         lcd.print(" ");
     }
     blinkTime = millis();
+    blinkOn = false;
+}
+
+void flashTextOff(char text[], int locationX, int locationY){
+    blinkOn = true;
+    lcd.setCursor(locationX,locationY);
+    lcd.print(text);
 }

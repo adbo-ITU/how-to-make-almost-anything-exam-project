@@ -26,15 +26,25 @@ void loop() {
   if (globalState == 0){ // Select temp
     updateValEncoder(temp, maxTemp, 0, 5);
     printTemp(int(temp));
+    flashTextOn("Temp", 0,0);
     confirmSelection(globalState);
   }
-  if (globalState == 1){ // Select time
+  if (globalState == 1){
+    flashTextOff("Temp", 0,0);
+    globalState ++;
+  }
+  if (globalState == 2){ // Select time
     updateValEncoder(seconds, maxSec, 0, 5);
     printTime(seconds/60, seconds%60);
+    flashTextOn("Time", 0,1);
     confirmSelection(globalState);
     startTime = millis();
   }
-  if (globalState == 2){ // Timer countDown
+  if (globalState == 3){
+    flashTextOff("Time", 0,1);
+    globalState ++;
+  }
+  if (globalState == 4){ // Timer countDown
     if(getSecLeft() <= 0){
       globalState++;
     }

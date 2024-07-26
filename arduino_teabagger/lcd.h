@@ -9,4 +9,5 @@ void setupLCD();
 void printLCDText();
 void printTime(long min, long sec);
 void printTemp(int t);
-void flashText(char text[], int locationX, int locationY);
+void flashTextOn(char text[], int locationX, int locationY);
+void flashTextOff(char text[], int locationX, int locationY);
