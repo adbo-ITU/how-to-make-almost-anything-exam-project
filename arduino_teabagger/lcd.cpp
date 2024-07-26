@@ -10,7 +10,6 @@ const char timeText[] = "Time";
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 unsigned long blinkTime;
-const unsigned int blinkInterval = 500;
 bool blinkOn = true;
 
 void setupLCD(){
@@ -49,8 +48,10 @@ void printTemp(int t){
   lcd.print("C");
 }
 
-void flashTextOn(char text[], int locationX, int locationY){
-    if (millis() - blinkTime < blinkInterval) {
+void flashTextOn(char text[], int locationX, int locationY, int time){
+    // flashes the 
+    // Note remember to turn flashText off, by using the function.
+    if (millis() - blinkTime < time) {
         return;
     }
     lcd.setCursor(locationX,locationY);
@@ -69,7 +70,33 @@ void flashTextOn(char text[], int locationX, int locationY){
 }
 
 void flashTextOff(char text[], int locationX, int locationY){
+    //
     blinkOn = true;
     lcd.setCursor(locationX,locationY);
     lcd.print(text);
+}
+
+void clearDisplay(){
+    for (int i = 0; i < LCDHeight; i++) {
+        lcd.setCursor(0, i);
+        for (int j = 0; j < LCDWidth; j++) {
+            lcd.print(" ");
+        }
+    }
+}
+
+void printTeaBaggerTxt(){
+    // Prints a goodbye message
+    lcd.setCursor(2,0);
+    lcd.print("Your tea has");
+    lcd.setCursor(1,1);
+    lcd.print("been teabagged");
+}
+
+void printWelcomeTxt(){
+    // Prints a goodbye message
+    lcd.setCursor(3,0);
+    lcd.print("Welcome to");
+    lcd.setCursor(1,1);
+    lcd.print("The Teabagger");
 }
