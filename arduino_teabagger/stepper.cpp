@@ -36,7 +36,7 @@ void moveToPos(unsigned int newPos) {
     return;
 
   unsigned int direction = newPos == POS_TOP ? LOW : HIGH;
-  const unsigned int REVS_FROM_TOP_TO_BOTTOM = 4;
+  const unsigned int REVS_FROM_TOP_TO_BOTTOM = 1;
 
   rotateStepper(direction, REVS_FROM_TOP_TO_BOTTOM);
   curPos = newPos;
