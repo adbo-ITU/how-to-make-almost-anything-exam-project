@@ -1,71 +1,85 @@
 // display setup 
 // https://docs.arduino.cc/learn/electronics/lcd-displays/
 
-#define pinA 11
-#define pinB 12
-#define encoderButtonpin 13
+#include "rotaryEncoder.h"
+#include "lcd.h"
 
-const int maxMin = 99;
+int globalState = 0;
+
 const int maxTemp = 100;
-float temp;
-float minutes;
-int aState;
-int aLastState;
-bool encoderButtonState;
-bool encoderButtonLastState;
-int globalState;
+int temp = 100;
+
+const int maxSec = 5940;
+int seconds = 0;
+unsigned long startTime;
+
+const unsigned int blinkInterval = 500;
 
 void setup() { 
-  pinMode(pinA, INPUT);
-  pinMode(pinB, INPUT);
-  pinMode(encoderButtonpin, INPUT);
-   
   Serial.begin(9600);
   // Reads the initial state of the outputA
-  aLastState = digitalRead(pinA);
-  encoderButtonLastState = digitalRead(encoderButtonpin);
-  globalState = 0;
-  temp = 100;
-  minutes = 0;
+  setupRotaryEncoderPins();
+  setupLCD();
+  printWelcomeTxt();
 } 
 
 void loop() {
-  if (globalState == 0){ // Select temp
+  if (globalState == 0){
+    clearDisplay();
+    printWelcomeTxt();
+    delay(2000);
+    clearDisplay();
+    printLCDText();
+
+    globalState++;
+  }
+  if (globalState == 1){ // Select temp
     updateValEncoder(temp, maxTemp, 0, 5);
-    confirmSelection();
+    printTemp(int(temp));
+    flashTextOn("Temp", 0, 0, blinkInterval);
+    confirmSelection(globalState);
   }
-  if (globalState == 1){ // Select time
-    updateValEncoder(minutes, maxMin, 0, 0.5);
-    confirmSelection();
+  if (globalState == 2){
+    flashTextOff("Temp", 0,0);
+    globalState ++;
   }
-  if (globalState == 2){ // Timer countDown
+  if (globalState == 3){ // Select time
+    updateValEncoder(seconds, maxSec, 0, 5);
+    printTime(seconds/60, seconds%60);
+    flashTextOn("Time", 0, 1, blinkInterval);
+    confirmSelection(globalState);
+    startTime = millis();
   }
-}
-
-void updateValEncoder(float &val, int maxval, int minval, float interval){
-    aState = digitalRead(pinA); // Reads the "current" state of the outputA
-    // If the previous and the current state of the outputA are different, that means a Pulse has occured
-    if (aState != aLastState){     
-      // If the outputB state is different to the outputA state, that means the encoder is rotating clockwise
-      if (digitalRead(pinB) != aState) { 
-        if(val > minval) {val -=interval;} // 
-      } else {
-        if(val < maxval) {val +=interval;} // 
-      }
-      Serial.print("value: ");
-      Serial.println(val);
-    } 
-    aLastState = aState; // Updates the previous state of the outputA with the current state
-}
-
-void confirmSelection(){
-  encoderButtonState = digitalRead(encoderButtonpin);
-  if (encoderButtonState !=encoderButtonLastState) {
-    if (encoderButtonState == 0) {
-      Serial.println("Button was pressed");
-      globalState ++;
-      Serial.println(globalState);
+  if (globalState == 4){
+    flashTextOff("Time", 0,1);
+    globalState ++;
+  }
+  if (globalState == 5){ // Timer countDown
+    if(getSecLeft() <= 0){
+      globalState++;
     }
-    encoderButtonLastState = encoderButtonState;
+    countdown();
   }
+  if (globalState == 6) {
+    clearDisplay();
+    globalState ++;
+  }
+  if (globalState == 7) {
+    printTeaBaggerTxt();
+  }
+}
+
+void countdown(){
+  unsigned long timeLeft = getSecLeft();
+  printTime(timeLeft/60, timeLeft%60);
+
+}
+long getSecLeft(){
+  //Returns the seconds remaining from the timer
+  unsigned long timeLeft = seconds > getElapsedSec(startTime) ? seconds - getElapsedSec(startTime) : 0;
+
+  return timeLeft;
+}
+long getElapsedSec(long time){
+  return (millis() - time) / 1000;
 }
