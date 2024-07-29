@@ -48,6 +48,21 @@ void printTemp(int t){
   lcd.print("C");
 }
 
+void printTempOfTemp(int currentTemp, int wantedTemp){
+  lcd.setCursor(8, 0);
+  if (currentTemp < 100) {
+    lcd.print(" ");
+  }
+  if (wantedTemp < 100) {
+    lcd.print(" ");
+  }
+  lcd.print(currentTemp);
+  lcd.print("/");
+  lcd.print(wantedTemp);
+  //if(wantedTemp >= 100) {
+  //}
+}
+
 void flashTextOn(char text[], int locationX, int locationY, int time){
     // flashes the 
     // Note remember to turn flashText off, by using the function.

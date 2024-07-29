@@ -3,6 +3,11 @@
 
 #include "rotaryEncoder.h"
 #include "lcd.h"
+//#include <OneWire.h>
+//#include <DallasTemperature.h>
+
+//#define ONE_WIRE_BUS 4
+//OneWire oneWire(ONE_WIRE_BUS);
 
 int globalState = 0;
 
@@ -20,7 +25,6 @@ void setup() {
   // Reads the initial state of the outputA
   setupRotaryEncoderPins();
   setupLCD();
-  printWelcomeTxt();
 } 
 
 void loop() {
@@ -30,6 +34,7 @@ void loop() {
     delay(2000);
     clearDisplay();
     printLCDText();
+    printTime(0,0);
 
     globalState++;
   }
@@ -39,7 +44,7 @@ void loop() {
     flashTextOn("Temp", 0, 0, blinkInterval);
     confirmSelection(globalState);
   }
-  if (globalState == 2){
+  if (globalState == 2){ // turn off flashing text
     flashTextOff("Temp", 0,0);
     globalState ++;
   }
@@ -48,23 +53,27 @@ void loop() {
     printTime(seconds/60, seconds%60);
     flashTextOn("Time", 0, 1, blinkInterval);
     confirmSelection(globalState);
-    startTime = millis();
   }
-  if (globalState == 4){
+  if (globalState == 4){ // turn off flashing text
     flashTextOff("Time", 0,1);
     globalState ++;
   }
-  if (globalState == 5){ // Timer countDown
+  if (globalState == 5){ // turn off flashing text
+    printTempOfTemp(70, temp);
+    startTime = millis();
+    globalState ++;
+  }
+  if (globalState == 6){ // Timer countDown
     if(getSecLeft() <= 0){
       globalState++;
     }
     countdown();
   }
-  if (globalState == 6) {
+  if (globalState == 7) {
     clearDisplay();
     globalState ++;
   }
-  if (globalState == 7) {
+  if (globalState == 8) {
     printTeaBaggerTxt();
   }
 }
